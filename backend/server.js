@@ -26,9 +26,16 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('A user connected');
 
-    socket.on('message', (message) => {
+    // Listen for joining a room
+    socket.on('joinRoom', (roomNumber) => {
+        console.log(`A user joined room: ${roomNumber}`);
+        socket.join(roomNumber);
+    });
+
+    // Modify to emit message only to sockets in the same room
+    socket.on('message', (message, roomNumber) => {
         console.log('Received message:', message);
-        io.emit('message', message);
+        io.to(roomNumber).emit('message', message);
     });
 
     socket.on('disconnect', () => {

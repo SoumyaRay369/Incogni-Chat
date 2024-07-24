@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
-const socket = io('https://incogni-chat.onrender.com');
+import { useParams } from 'react-router-dom';
+
+// Assuming your socket server is running on localhost:4000
+const socket = io('https://incogni-chat.vercel.app/');
 
 export const MessageSection = ({ addMessage }) => {
     const [message, setMessage] = useState('');
+    const { roomNumber } = useParams(); // Capture the room number from the URL
+
+
 
     useEffect(() => {
+        // Join the room when the component mounts
+        socket.emit('joinRoom', roomNumber);
+    
         socket.on('message', (message) => {
             console.log('Received message from server:', message);
             try {
@@ -14,17 +23,19 @@ export const MessageSection = ({ addMessage }) => {
                 console.log(error);
             }
         });
-
+    
         // Clean up the socket connection when the component unmounts
         return () => {
             socket.off('message');
         };
-    }, [addMessage]);
+    }, [addMessage, roomNumber]);
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Sending message:', message);
-        socket.emit('message', message);
+        console.log('Sending message to room:', roomNumber, 'Message:', message);
+        // Include the room number when emitting the message
+        socket.emit('message', message, roomNumber);
         setMessage('');
     };
 
