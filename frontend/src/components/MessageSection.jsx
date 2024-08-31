@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 
 // Assuming your socket server is running on localhost:4000
 const socket = io('https://incogni-chat.onrender.com/');
+// const socket = io('http://localhost:4000');
 
 export const MessageSection = ({ addMessage }) => {
     const [message, setMessage] = useState('');
