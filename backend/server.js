@@ -26,22 +26,35 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('A user connected');
 
-    // Listen for joining a room
-    socket.on('joinRoom', (roomNumber) => {
-        console.log(`A user joined room: ${roomNumber}`);
+    socket.on('joinRoom', (roomNumber, peerId) => {
+        console.log(`A user with peerId ${peerId} joined room: ${roomNumber}`);
         socket.join(roomNumber);
+   
+        // Store the peerId on the socket object to identify when the user disconnects
+        socket.peerId = peerId;
+   
+        // Notify existing peers in the room about the new peer
+        socket.to(roomNumber).emit('newPeer', peerId); // Notify others in the room of the new peer
+   
+        // Send existing peer IDs to the newly joined peer
+        const clientsInRoom = io.sockets.adapter.rooms.get(roomNumber) || new Set();
+        clientsInRoom.forEach((clientSocketId) => {
+            if (clientSocketId !== socket.id) {
+                const clientSocket = io.sockets.sockets.get(clientSocketId);
+                if (clientSocket && clientSocket.peerId) {
+                    socket.emit('newPeer', clientSocket.peerId);
+                }
+            }
+        });
     });
-
-    // Modify to emit message only to sockets in the same room
-    socket.on('message', (message, roomNumber) => {
-        console.log('Received message:', message);
-        io.to(roomNumber).emit('message', message);
-    });
+   
 
     socket.on('disconnect', () => {
-        console.log('User disconnected');
+        console.log(`User with peerId ${socket.peerId} disconnected`);
+        socket.to(socket.rooms).emit('peerDisconnected', socket.peerId);
     });
 });
+
 
 server.listen(PORT, () => {
     console.log(`Socket.io server is running on ${PORT}`);

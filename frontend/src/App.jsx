@@ -4,6 +4,7 @@ import { HeaderSection } from './components/HeaderSection';
 import { MessageSection } from './components/MessageSection';
 import { ConversationSection } from './components/ConversationSection';
 import { RoomJoinPage } from './components/RoomJoinPage';
+import { VideoChat } from './components/VideoChat';
 
 function App() {
     const [messages, setMessages] = useState([]);
@@ -26,6 +27,7 @@ function App() {
                         </div>
                     </>
                 } />
+                <Route path="/VideoChat/:roomNumber" element={<VideoChat></VideoChat>} />
             </Routes>
         </Router>
     );
