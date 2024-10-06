@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import { useParams } from 'react-router-dom';
 
 // const socket = io('http://localhost:4000'); // Adjust this URL based on your backend address
-const socket = io('http://incogni-chat.onrender.com/'); // Adjust this URL based on your backend address
+const socket = io('https://incogni-chat.onrender.com/'); // Adjust this URL based on your backend address
 export const VideoChat = () => {
   const [peer, setPeer] = useState(null);
   const { roomNumber } = useParams();
