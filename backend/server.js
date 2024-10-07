@@ -29,13 +29,13 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', (roomNumber, peerId) => {
         console.log(`A user with peerId ${peerId} joined room: ${roomNumber}`);
         socket.join(roomNumber);
-   
+
         // Store the peerId on the socket object to identify when the user disconnects
         socket.peerId = peerId;
-   
+
         // Notify existing peers in the room about the new peer
         socket.to(roomNumber).emit('newPeer', peerId); // Notify others in the room of the new peer
-   
+
         // Send existing peer IDs to the newly joined peer
         const clientsInRoom = io.sockets.adapter.rooms.get(roomNumber) || new Set();
         clientsInRoom.forEach((clientSocketId) => {
@@ -47,7 +47,12 @@ io.on('connection', (socket) => {
             }
         });
     });
-   
+
+    // Handle incoming messages and broadcast to the room
+    socket.on('message', (message, roomNumber) => {
+        console.log(`Received message: ${message} for room: ${roomNumber}`);
+        io.to(roomNumber).emit('message', message); // Broadcast the message to everyone in the room
+    });
 
     socket.on('disconnect', () => {
         console.log(`User with peerId ${socket.peerId} disconnected`);
